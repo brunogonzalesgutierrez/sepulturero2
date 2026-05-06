@@ -1,0 +1,17 @@
+git pull origin main
+# haces tus cambios
+git add .
+git commit -m "lo que hiciste"
+git push origin main
+
+
+https://docs.stripe.com/testing?testing-method=card-numbers#cards
+
+
+numeros de tarjetas
+
+4242424242424242
+4000056655665556
+5555555555554444
+2223003122003222
+2223003122003222
