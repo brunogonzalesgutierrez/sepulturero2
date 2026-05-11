@@ -267,6 +267,24 @@
                     </button>
                 </form>
             </div>
+
+
+            {{-- Libélula --}}
+            <div class="metodo-card">
+                <div class="metodo-info">
+                    <div class="metodo-icon">🦋</div>
+                    <div>
+                        <div class="metodo-nombre">Libélula</div>
+                        <div class="metodo-desc">QR Simple, Tigo Money, Tarjeta, BCP — en bolivianos</div>
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('cliente.libelula.pagar', $cuota->id) }}">
+                    @csrf
+                    <button type="submit" class="btn-pagar" style="background:#6b21a8; color:#fff;">
+                        Pagar con Libélula
+                    </button>
+                </form>
+            </div>
         </div>
 
         <a href="{{ route('cliente.cuotas') }}" class="btn-back">
