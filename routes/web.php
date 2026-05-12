@@ -18,12 +18,16 @@ use App\Http\Controllers\BitacoraController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\RolController;
+use App\Http\Controllers\TwoFactorController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Auth::routes(['register' => false]);
+
+// Verificación 2FA al login — FUERA del grupo auth
+Route::get('/2fa/verify',  [TwoFactorController::class, 'showVerify'])->name('2fa.verify');
+Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify.post');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/sistema', [DashboardController::class, 'index'])->name('dashboard');
@@ -43,51 +47,49 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('ventas',            VentaController::class);
     Route::resource('roles',             RolController::class)->except(['show']);
 
-    // Rutas especiales ANTES del resource de pagos
     Route::post('/pagos/marcar-vencidas', [PagoController::class, 'marcarVencidas'])
         ->name('pagos.marcarVencidas');
     Route::resource('pagos', PagoController::class);
 
-    // Correos manuales
     Route::post('/ventas/{venta}/enviar-factura', [VentaController::class, 'enviarFactura'])
         ->name('ventas.enviarFactura');
     Route::post('/pagos/{pago}/enviar-recibo', [PagoController::class, 'enviarRecibo'])
         ->name('pagos.enviarRecibo');
 
-    // Bitácora
     Route::get('/bitacora', [BitacoraController::class, 'index'])->name('bitacora.index');
 
-    // Reportes
     Route::get('/reportes',           [ReporteController::class, 'index'])->name('reportes.index');
     Route::get('/reportes/ventas',    [ReporteController::class, 'ventas'])->name('reportes.ventas');
     Route::get('/reportes/pagos',     [ReporteController::class, 'pagos'])->name('reportes.pagos');
     Route::get('/reportes/espacios',  [ReporteController::class, 'espacios'])->name('reportes.espacios');
     Route::get('/reportes/contratos', [ReporteController::class, 'contratos'])->name('reportes.contratos');
 
-    // Perfil
     Route::get('/perfil',          [PerfilController::class, 'index'])->name('perfil.index');
     Route::put('/perfil',          [PerfilController::class, 'update'])->name('perfil.update');
     Route::put('/perfil/password', [PerfilController::class, 'cambiarPassword'])->name('perfil.password');
+
+    // 2FA setup desde perfil
+    Route::get('/2fa/setup',       [TwoFactorController::class, 'setup'])->name('2fa.setup');
+    Route::post('/2fa/activate',   [TwoFactorController::class, 'activate'])->name('2fa.activate');
+    Route::post('/2fa/desactivar', [TwoFactorController::class, 'desactivar'])->name('2fa.desactivar');
 });
-
-
 
 // ── PORTAL CLIENTE ──────────────────────────────────────
 Route::prefix('cliente')->name('cliente.')->group(function () {
 
     Route::middleware('guest')->group(function () {
-        Route::get('/login',       [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'showLogin'])->name('login');
-        Route::post('/login',      [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'login'])->name('login.post');
-        Route::get('/register',    [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'showRegister'])->name('register');
-        Route::post('/register',   [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'register'])->name('register.post');
+        Route::get('/login',     [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'showLogin'])->name('login');
+        Route::post('/login',    [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'login'])->name('login.post');
+        Route::get('/register',  [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'showRegister'])->name('register');
+        Route::post('/register', [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'register'])->name('register.post');
     });
 
     Route::middleware('cliente')->group(function () {
-        Route::get('/dashboard',       [\App\Http\Controllers\Cliente\ClientePortalController::class, 'dashboard'])->name('dashboard');
-        Route::get('/contrato/{id}',   [\App\Http\Controllers\Cliente\ClientePortalController::class, 'contrato'])->name('contrato');
-        Route::get('/cuotas',          [\App\Http\Controllers\Cliente\ClientePortalController::class, 'cuotas'])->name('cuotas');
-        Route::post('/logout',         [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'logout'])->name('logout');
-        Route::get('/pagar/{cuota}',   [\App\Http\Controllers\Cliente\ClientePortalController::class, 'pagar'])->name('pagar');
+        Route::get('/dashboard',     [\App\Http\Controllers\Cliente\ClientePortalController::class, 'dashboard'])->name('dashboard');
+        Route::get('/contrato/{id}', [\App\Http\Controllers\Cliente\ClientePortalController::class, 'contrato'])->name('contrato');
+        Route::get('/cuotas',        [\App\Http\Controllers\Cliente\ClientePortalController::class, 'cuotas'])->name('cuotas');
+        Route::post('/logout',       [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'logout'])->name('logout');
+        Route::get('/pagar/{cuota}', [\App\Http\Controllers\Cliente\ClientePortalController::class, 'pagar'])->name('pagar');
 
         // PayPal
         Route::post('/paypal/{cuota}',        [\App\Http\Controllers\Cliente\PaypalPagoController::class, 'pagar'])->name('paypal.pagar');
@@ -109,6 +111,6 @@ Route::prefix('cliente')->name('cliente.')->group(function () {
     });
 });
 
-// Callback Libélula — FUERA de todo grupo (Libélula lo llama sin sesión)
+// Callback Libélula — FUERA de todo grupo
 Route::get('/cliente/libelula/callback', [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'callback'])
     ->name('cliente.libelula.callback');

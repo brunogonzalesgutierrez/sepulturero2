@@ -124,6 +124,10 @@
                         <td>{{ $user->updated_at->format('d/m/Y H:i') }}</td>
                     </tr>
                 </table>
+
+                <a href="{{ route('2fa.setup') }}" class="btn btn-outline-warning">
+                    🔐 {{ auth()->user()->two_factor_enabled ? 'Gestionar 2FA' : 'Activar 2FA' }}
+                </a>
             </div>
         </div>
     </div>

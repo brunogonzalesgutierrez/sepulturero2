@@ -12,13 +12,14 @@ class User extends Authenticatable
 {
     use Notifiable, SoftDeletes, HasRoles;
 
-    protected $fillable = ['empleado_id', 'cliente_id', 'username', 'email', 'password', 'estado', 'intentos_fallidos', 'bloqueado_hasta'];
+    protected $fillable = ['empleado_id', 'cliente_id', 'username', 'email', 'password', 'estado', 'intentos_fallidos', 'bloqueado_hasta', 'two_factor_secret', 'two_factor_enabled',];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'two_factor_secret',];
 
     protected $casts = [
         'bloqueado_hasta' => 'datetime',
         'password'        => 'hashed',
+        'two_factor_enabled' => 'boolean',
     ];
 
     public function empleado()
@@ -36,4 +37,5 @@ class User extends Authenticatable
     {
         return 'username';
     }
+
 }
