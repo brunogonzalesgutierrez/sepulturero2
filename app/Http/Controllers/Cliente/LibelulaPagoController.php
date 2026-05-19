@@ -18,7 +18,6 @@ class LibelulaPagoController extends Controller
         $cuota   = Cuota::findOrFail($cuotaId);
         $cliente = Auth::user()->cliente;
 
-        // Verificar que la cuota pertenece al cliente
         $perteneceAlCliente = $cuota->planPago->pagoCredito->venta->contrato->cliente_id === $cliente->id;
         if (!$perteneceAlCliente) {
             return redirect()->route('cliente.dashboard')->with('error', 'Acceso no autorizado.');
@@ -28,7 +27,6 @@ class LibelulaPagoController extends Controller
             return redirect()->route('cliente.cuotas')->with('error', 'Esta cuota ya fue pagada.');
         }
 
-        // Identificador único para esta deuda (cuota_id + timestamp para evitar duplicados)
         $identificador = 'CUOTA-' . $cuota->id . '-' . time();
 
         $resultado = LibelulaService::registrarDeuda([
@@ -43,9 +41,9 @@ class LibelulaPagoController extends Controller
             'callback_url'      => route('cliente.libelula.callback'),
             'url_retorno'       => route('cliente.libelula.retorno', ['cuota' => $cuotaId]),
             'lineas_detalle_deuda' => [[
-                'concepto'       => "Cuota #{$cuota->nro_cuota} — Cementerio El Sepulturero Juan",
-                'cantidad'       => 1,
-                'costo_unitario' => floatval($cuota->monto),
+                'concepto'           => "Cuota #{$cuota->nro_cuota} — Cementerio El Sepulturero Juan",
+                'cantidad'           => 1,
+                'costo_unitario'     => floatval($cuota->monto),
                 'descuento_unitario' => 0,
             ]],
             'lineas_metadatos' => [
@@ -55,11 +53,26 @@ class LibelulaPagoController extends Controller
             ],
         ]);
 
-        if (isset($resultado['error']) && $resultado['error'] == 0 && isset($resultado['url_pasarela_pagos'])) {
-            // Guardar el identificador en sesión para recuperarlo en el callback
+        if (isset($resultado['error']) && $resultado['error'] == 0) {
             session(['libelula_identificador_' . $cuotaId => $identificador]);
 
-            return redirect($resultado['url_pasarela_pagos']);
+            // Si tiene QR, mostrar en tu página
+            // Si no tiene QR, redirigir a la pasarela normal
+            $qrUrl          = $resultado['qr_simple_url'] ?? null;
+            $urlPasarela    = $resultado['url_pasarela_pagos'] ?? null;
+
+            if ($qrUrl) {
+                // Guardar en sesión para la vista del QR
+                session([
+                    'libelula_qr_'       . $cuotaId => $qrUrl,
+                    'libelula_pasarela_' . $cuotaId => $urlPasarela,
+                    'libelula_identificador_' . $cuotaId => $identificador,
+                ]);
+
+                return redirect()->route('cliente.libelula.qr', $cuotaId);
+            }
+
+            return redirect($urlPasarela);
         }
 
         return redirect()->route('cliente.cuotas')
@@ -164,5 +177,54 @@ class LibelulaPagoController extends Controller
                 "Pago Libélula de {$cuota->monto} para cuota #{$cuota->nro_cuota} — forma: " . ($datos['forma_pago'] ?? 'N/A')
             );
         });
+    }
+
+
+
+
+    public function verificar(Request $request, $cuotaId)
+    {
+        $cuota         = Cuota::findOrFail($cuotaId);
+        $identificador = session('libelula_identificador_' . $cuotaId);
+
+        if (!$identificador) {
+            return response()->json(['pagado' => false, 'error' => 'Sin identificador en sesión']);
+        }
+
+        $pagado = LibelulaService::verificarPago($identificador);
+
+        if ($pagado) {
+            $resultado = LibelulaService::consultarDeuda($identificador);
+            $datos     = $resultado['datos'] ?? [];
+            $this->procesarPago($cuotaId, $datos);
+        }
+
+        return response()->json([
+            'pagado'      => $pagado,
+            'redirect'    => $pagado ? route('cliente.libelula.retorno', $cuotaId) : null,
+        ]);
+    }
+
+
+
+
+    public function mostrarQr(Request $request, $cuotaId)
+    {
+        $cuota = Cuota::whereHas('planPago.pagoCredito.venta.contrato', function($q) {
+            $q->where('cliente_id', Auth::user()->cliente->id);
+        })->with(['planPago.pagoCredito.venta.contrato.espacio.cementerio'])
+        ->findOrFail($cuotaId);
+
+        $qrUrl    = session('libelula_qr_'       . $cuotaId);
+        $pasarela = session('libelula_pasarela_' . $cuotaId);
+
+        if (!$qrUrl) {
+            return redirect()->route('cliente.pagar', $cuotaId)
+                ->with('error', 'El QR expiró. Genera uno nuevo.');
+        }
+
+        $contrato = $cuota->planPago->pagoCredito->venta->contrato;
+
+        return view('cliente.libelula-qr', compact('cuota', 'qrUrl', 'pasarela', 'contrato'));
     }
 }

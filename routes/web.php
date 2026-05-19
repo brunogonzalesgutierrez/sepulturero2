@@ -21,7 +21,8 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\TwoFactorController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home.alt');
+
 Route::get('/buscar-espacios', [App\Http\Controllers\HomeController::class, 'buscarEspacios'])->name('home.buscar');  // 👈 aquí
 Route::get('/espacios-disponibles', [App\Http\Controllers\HomeController::class, 'espaciosDisponibles'])->name('home.espacios');
 Route::post('/contacto', [App\Http\Controllers\HomeController::class, 'enviarContacto'])->name('home.contacto');
@@ -108,14 +109,17 @@ Route::prefix('cliente')->name('cliente.')->group(function () {
         Route::get('/stripe/{cuota}/cancel',  [\App\Http\Controllers\Cliente\StripePagoController::class, 'cancel'])->name('stripe.cancel');
 
         // Libélula
-        Route::post('/libelula/{cuota}',        [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'pagar'])->name('libelula.pagar');
-        Route::get('/libelula/{cuota}/retorno', [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'retorno'])->name('libelula.retorno');
+        // Libélula — Cuotas
+        Route::post('/libelula/{cuota}',          [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'pagar'])->name('libelula.pagar');
+        Route::get('/libelula/{cuota}/retorno',   [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'retorno'])->name('libelula.retorno');
+        Route::get('/libelula/{cuota}/verificar', [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'verificar'])->name('libelula.verificar');
+        Route::get('/libelula/{cuota}/qr',        [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'mostrarQr'])->name('libelula.qr');
 
-
-        // Libélula — Mantenimientos
-        Route::post('/libelula/mantenimiento/{venta}', [\App\Http\Controllers\Cliente\LibelulaMantenimientoPagoController::class, 'pagar'])->name('libelula.mantenimiento.pagar');
-        Route::get('/libelula/mantenimiento/{venta}/retorno', [\App\Http\Controllers\Cliente\LibelulaMantenimientoPagoController::class, 'retorno'])->name('libelula.mantenimiento.retorno');
-
+        // Libélula — Mantenimientos (prefijo propio para no chocar con {cuota})
+        Route::post('/libelula-mant/{venta}',          [\App\Http\Controllers\Cliente\LibelulaMantenimientoPagoController::class, 'pagar'])->name('libelula.mantenimiento.pagar');
+        Route::get('/libelula-mant/{venta}/retorno',   [\App\Http\Controllers\Cliente\LibelulaMantenimientoPagoController::class, 'retorno'])->name('libelula.mantenimiento.retorno');
+        Route::get('/libelula-mant/{venta}/qr',        [\App\Http\Controllers\Cliente\LibelulaMantenimientoPagoController::class, 'mostrarQr'])->name('libelula.mantenimiento.qr');
+        Route::get('/libelula-mant/{venta}/verificar', [\App\Http\Controllers\Cliente\LibelulaMantenimientoPagoController::class, 'verificar'])->name('libelula.mantenimiento.verificar');
         // Pagar mantenimiento — página de selección de método
         Route::get('/mantenimientos/{venta}/pagar', [\App\Http\Controllers\Cliente\ClienteMantenimientoController::class, 'pagar'])->name('mantenimientos.pagar');
 

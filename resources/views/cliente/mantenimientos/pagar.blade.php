@@ -77,7 +77,7 @@
             <form method="POST" action="{{ route('cliente.libelula.mantenimiento.pagar', $venta->id) }}">
                 @csrf
                 <button type="submit" class="btn-pagar" style="background:#6b21a8; color:#fff;">
-                    Pagar con Libélula
+                    Generar QR de pago
                 </button>
             </form>
         </div>

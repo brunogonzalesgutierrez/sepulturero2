@@ -23,4 +23,21 @@ class LibelulaService
 
         return $response->json();
     }
+
+
+    public static function verificarPago(string $identificador): bool
+    {
+        try {
+            $response = Http::post(env('LIBELULA_URL') . '/rest/deuda/consultar_deudas/por_identificador', [
+                'appkey'       => env('LIBELULA_APPKEY'),
+                'identificador' => $identificador,
+            ]);
+
+            $data = $response->json();
+
+            return isset($data['datos']['pagado']) && $data['datos']['pagado'] === true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

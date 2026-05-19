@@ -45,19 +45,70 @@ class LibelulaMantenimientoPagoController extends Controller
                 'descuento_unitario' => 0,
             ]],
             'lineas_metadatos' => [
-                ['nombre' => 'Tipo',   'dato' => $venta->tipoMantenimiento->nombre ?? 'N/A'],
-                ['nombre' => 'Espacio','dato' => 'ID #' . $venta->espacio_id],
-                ['nombre' => 'CI',     'dato' => $cliente->ci],
+                ['nombre' => 'Tipo',    'dato' => $venta->tipoMantenimiento->nombre ?? 'N/A'],
+                ['nombre' => 'Espacio', 'dato' => 'ID #' . $venta->espacio_id],
+                ['nombre' => 'CI',      'dato' => $cliente->ci],
             ],
         ]);
 
-        if (isset($resultado['error']) && $resultado['error'] == 0 && isset($resultado['url_pasarela_pagos'])) {
+        if (isset($resultado['error']) && $resultado['error'] == 0) {
+            $qrUrl       = $resultado['qr_simple_url']      ?? null;
+            $urlPasarela = $resultado['url_pasarela_pagos'] ?? null;
+
             session(['libelula_mant_' . $ventaId => $identificador]);
-            return redirect($resultado['url_pasarela_pagos']);
+
+            if ($qrUrl) {
+                session([
+                    'libelula_mant_qr_'       . $ventaId => $qrUrl,
+                    'libelula_mant_pasarela_' . $ventaId => $urlPasarela,
+                ]);
+                return redirect()->route('cliente.libelula.mantenimiento.qr', $ventaId);
+            }
+
+            return redirect($urlPasarela);
         }
 
         return redirect()->route('cliente.mantenimientos.index')
             ->with('error', 'Error al conectar con Libélula: ' . ($resultado['mensaje'] ?? 'Error desconocido'));
+    }
+
+    public function mostrarQr(Request $request, $ventaId)
+    {
+        $cliente = Auth::user()->cliente;
+        $venta   = VentaMantenimiento::with(['tipoMantenimiento', 'espacio.cementerio'])
+            ->where('cliente_id', $cliente->id)
+            ->findOrFail($ventaId);
+
+        $qrUrl    = session('libelula_mant_qr_'       . $ventaId);
+        $pasarela = session('libelula_mant_pasarela_' . $ventaId);
+
+        if (!$qrUrl) {
+            return redirect()->route('cliente.mantenimientos.pagar', $ventaId)
+                ->with('error', 'El QR expiró. Genera uno nuevo.');
+        }
+
+        return view('cliente.mantenimientos.libelula-qr', compact('venta', 'qrUrl', 'pasarela', 'cliente'));
+    }
+
+    public function verificar(Request $request, $ventaId)
+    {
+        $identificador = session('libelula_mant_' . $ventaId);
+
+        if (!$identificador) {
+            return response()->json(['pagado' => false, 'error' => 'Sin identificador en sesión']);
+        }
+
+        $pagado = LibelulaService::verificarPago($identificador);
+
+        if ($pagado) {
+            $resultado = LibelulaService::consultarDeuda($identificador);
+            $this->procesarPago($ventaId, $resultado['datos'] ?? []);
+        }
+
+        return response()->json([
+            'pagado'   => $pagado,
+            'redirect' => $pagado ? route('cliente.mantenimientos.index') : null,
+        ]);
     }
 
     public function callback(Request $request)
@@ -130,4 +181,8 @@ class LibelulaMantenimientoPagoController extends Controller
             );
         });
     }
+
+
+
+   
 }

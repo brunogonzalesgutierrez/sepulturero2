@@ -270,6 +270,48 @@
 
 
             {{-- Libélula --}}
+            @if(session('libelula_qr'))
+            {{-- QR generado — mostrar en tu página --}}
+            <div class="metodo-card flex-column align-items-center" style="border-color:var(--accent);">
+                <div class="metodo-info mb-3">
+                    <div class="metodo-icon">🦋</div>
+                    <div>
+                        <div class="metodo-nombre">Pagar con QR — Libélula</div>
+                        <div class="metodo-desc">Escanea con la app de tu banco (BCP, BNB, etc.)</div>
+                    </div>
+                </div>
+
+                {{-- QR Image --}}
+                <div style="background:#fff; padding:1rem; border-radius:10px; margin-bottom:1rem;">
+                    <img src="{{ session('libelula_qr') }}"
+                        alt="Código QR de pago"
+                        style="width:200px; height:200px; display:block;">
+                </div>
+
+                <div style="color:var(--muted); font-size:0.8rem; text-align:center; margin-bottom:1rem;">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Una vez escaneado y pagado, haz clic en "Confirmar Pago"
+                </div>
+
+                {{-- Botón confirmar --}}
+                <a href="{{ route('cliente.libelula.retorno', $cuota->id) }}"
+                class="btn-pagar"
+                style="background:var(--accent); color:var(--primary); text-decoration:none; text-align:center; display:inline-block;">
+                    <i class="bi bi-check-circle me-1"></i>Ya pagué — Confirmar
+                </a>
+
+                {{-- Enlace a pasarela completa si prefieren otro método --}}
+                @if(session('libelula_pasarela'))
+                <a href="{{ session('libelula_pasarela') }}"
+                style="color:var(--muted); font-size:0.78rem; margin-top:0.75rem; display:block; text-align:center; text-decoration:none;">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>
+                    Prefiero pagar con Tigo Money, tarjeta u otro método
+                </a>
+                @endif
+            </div>
+
+            @else
+            {{-- Botón normal para generar el QR --}}
             <div class="metodo-card">
                 <div class="metodo-info">
                     <div class="metodo-icon">🦋</div>
@@ -281,10 +323,11 @@
                 <form method="POST" action="{{ route('cliente.libelula.pagar', $cuota->id) }}">
                     @csrf
                     <button type="submit" class="btn-pagar" style="background:#6b21a8; color:#fff;">
-                        Pagar con Libélula
+                        Generar QR de pago
                     </button>
                 </form>
             </div>
+            @endif
         </div>
 
         <a href="{{ route('cliente.cuotas') }}" class="btn-back">

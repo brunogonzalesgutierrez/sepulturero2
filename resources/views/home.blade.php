@@ -13,7 +13,7 @@
         rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('css/home.css') }}?v=2">
 
-
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 </head>
 
@@ -590,10 +590,25 @@
                                 placeholder="Escriba su consulta aquí..." required>{{ old('mensaje') }}</textarea>
                             @error('mensaje')<span style="color:#f87171; font-size:0.8rem;">{{ $message }}</span>@enderror
                         </div>
+
+                        {{-- reCAPTCHA --}}
+                        @error('captcha')
+                        <div style="color:#f87171; font-size:0.8rem; margin-bottom:0.75rem;">
+                            <i class="fas fa-exclamation-circle me-1"></i>{{ $message }}
+                        </div>
+                        @enderror
+                        <div class="g-recaptcha"
+                            data-sitekey="{{ config('services.recaptcha.site_key') }}"
+                            style="margin-bottom:1rem;">
+                        </div>
+
+              
+
                         <button type="submit" class="btn btn-primary"
                             style="width:100%; justify-content:center; font-size:0.8rem;">
                             <i class="fas fa-paper-plane"></i> Enviar Mensaje
                         </button>
+                     
                     </form>
                 </div>
             </div>
