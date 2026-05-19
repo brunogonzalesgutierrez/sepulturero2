@@ -12,6 +12,8 @@ use App\Models\Mantenimiento;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use App\Mail\ReporteMail;
+use Illuminate\Support\Facades\Mail;
 
 class ReporteController extends Controller
 {
@@ -49,6 +51,22 @@ class ReporteController extends Controller
         if ($request->get('exportar') === 'pdf') {
             $pdf = Pdf::loadView('reportes.pdf.ventas', compact('ventas', 'desde', 'hasta', 'totalContado', 'totalCredito'))
                 ->setPaper('a4', 'landscape');
+
+            // Si quiere enviar por correo
+            if ($request->filled('correo_destino')) {
+                $correos = array_map('trim', explode(',', $request->correo_destino));
+                $nombreArchivo = "reporte_ventas_{$desde}_{$hasta}.pdf";
+
+                Mail::to($correos)->send(new ReporteMail(
+                    tipoReporte: "Ventas del {$desde} al {$hasta}",
+                    pdfContenido: $pdf->output(),
+                    nombreArchivo: $nombreArchivo,
+                    mensaje: "Se adjunta el reporte de ventas del período solicitado."
+                ));
+
+                return back()->with('success', 'Reporte enviado a: ' . implode(', ', $correos));
+            }
+
             return $pdf->download("reporte_ventas_{$desde}_{$hasta}.pdf");
         }
 
@@ -93,9 +111,32 @@ class ReporteController extends Controller
             ->get();
 
         if ($request->get('exportar') === 'pdf') {
-            $pdf = Pdf::loadView('reportes.pdf.pagos', compact('pagos', 'desde', 'hasta', 'totalCobrado', 'cuotasVencidas'))
-                ->setPaper('a4', 'landscape');
-            return $pdf->download("reporte_pagos_{$desde}_{$hasta}.pdf");
+            $pdf = Pdf::loadView(
+                'reportes.pdf.pagos',
+                compact('pagos', 'desde', 'hasta', 'totalCobrado', 'cuotasVencidas')
+            )->setPaper('a4', 'landscape');
+
+            // Enviar por correo
+            if ($request->filled('correo_destino')) {
+
+                $correos = array_map('trim', explode(',', $request->correo_destino));
+
+                $nombreArchivo = "reporte_pagos_{$desde}_{$hasta}.pdf";
+
+                Mail::to($correos)->send(new ReporteMail(
+                    tipoReporte: "Reporte de pagos {$desde} al {$hasta}",
+                    pdfContenido: $pdf->output(),
+                    nombreArchivo: $nombreArchivo,
+                    mensaje: "Se adjunta el reporte de pagos solicitado."
+                ));
+
+                return back()->with(
+                    'success',
+                    'Reporte enviado a: ' . implode(', ', $correos)
+                );
+            }
+
+            return $pdf->download($nombreArchivo);
         }
 
         return view('reportes.pagos', compact(
@@ -130,9 +171,33 @@ class ReporteController extends Controller
         $cementerios = \App\Models\Cementerio::where('estado', 'activo')->orderBy('nombre')->get();
 
         if ($request->get('exportar') === 'pdf') {
-            $pdf = Pdf::loadView('reportes.pdf.espacios', compact('espacios', 'porEstado', 'porTipo'))
-                ->setPaper('a4', 'landscape');
-            return $pdf->download("reporte_espacios.pdf");
+
+            $pdf = Pdf::loadView(
+                'reportes.pdf.espacios',
+                compact('espacios', 'porEstado', 'porTipo')
+            )->setPaper('a4', 'landscape');
+
+            // Enviar por correo
+            if ($request->filled('correo_destino')) {
+
+                $correos = array_map('trim', explode(',', $request->correo_destino));
+
+                $nombreArchivo = "reporte_espacios.pdf";
+
+                Mail::to($correos)->send(new ReporteMail(
+                    tipoReporte: "Reporte de espacios",
+                    pdfContenido: $pdf->output(),
+                    nombreArchivo: $nombreArchivo,
+                    mensaje: "Se adjunta el reporte de espacios solicitado."
+                ));
+
+                return back()->with(
+                    'success',
+                    'Reporte enviado a: ' . implode(', ', $correos)
+                );
+            }
+
+            return $pdf->download($nombreArchivo);
         }
 
         return view('reportes.espacios', compact(
@@ -162,9 +227,33 @@ class ReporteController extends Controller
         $totalMonto    = $contratos->sum('monto_base');
 
         if ($request->get('exportar') === 'pdf') {
-            $pdf = Pdf::loadView('reportes.pdf.contratos', compact('contratos', 'estado', 'totalSaldo', 'totalMonto'))
-                ->setPaper('a4', 'landscape');
-            return $pdf->download("reporte_contratos_{$estado}.pdf");
+
+            $pdf = Pdf::loadView(
+                'reportes.pdf.contratos',
+                compact('contratos', 'estado', 'totalSaldo', 'totalMonto')
+            )->setPaper('a4', 'landscape');
+
+            // Enviar por correo
+            if ($request->filled('correo_destino')) {
+
+                $correos = array_map('trim', explode(',', $request->correo_destino));
+
+                $nombreArchivo = "reporte_contratos_{$estado}.pdf";
+
+                Mail::to($correos)->send(new ReporteMail(
+                    tipoReporte: "Reporte de contratos {$estado}",
+                    pdfContenido: $pdf->output(),
+                    nombreArchivo: $nombreArchivo,
+                    mensaje: "Se adjunta el reporte de contratos solicitado."
+                ));
+
+                return back()->with(
+                    'success',
+                    'Reporte enviado a: ' . implode(', ', $correos)
+                );
+            }
+
+            return $pdf->download($nombreArchivo);
         }
 
         return view('reportes.contratos', compact(

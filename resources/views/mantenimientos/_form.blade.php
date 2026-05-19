@@ -18,22 +18,26 @@
     </div>
 
     <div class="col-md-4">
-        <label class="form-label fw-semibold">Tipo <span class="text-danger">*</span></label>
-        <select name="tipo" class="form-select @error('tipo') is-invalid @enderror" required>
-            @foreach(['limpieza','reparacion','renovacion','otro'] as $t)
-            <option value="{{ $t }}" {{ old('tipo', $mantenimiento->tipo ?? '') == $t ? 'selected':'' }}>
-                {{ ucfirst($t) }}
+        <label class="form-label fw-semibold">Tipo de Mantenimiento <span class="text-danger">*</span></label>
+        <select name="tipo_mantenimiento_id" class="form-select @error('tipo_mantenimiento_id') is-invalid @enderror" required>
+            <option value="">Seleccione un tipo...</option>
+            @foreach($tiposMantenimiento as $tipo)
+            <option value="{{ $tipo->id }}"
+                {{ old('tipo_mantenimiento_id', $mantenimiento->tipo_mantenimiento_id ?? '') == $tipo->id ? 'selected':'' }}>
+                {{ $tipo->nombre }} — {{ number_format($tipo->precio_base, 2) }} BOB
             </option>
             @endforeach
         </select>
-        @error('tipo')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        @error('tipo_mantenimiento_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
     <div class="col-md-4">
         <label class="form-label fw-semibold">Precio (BOB) <span class="text-danger">*</span></label>
         <input type="number" step="0.01" name="precio"
             class="form-control @error('precio') is-invalid @enderror"
-            value="{{ old('precio', $mantenimiento->precio ?? '') }}" required>
+            value="{{ old('precio', $mantenimiento->precio ?? '') }}"
+            id="precio-input" required>
+        <small class="text-muted">El precio base del tipo se carga automáticamente.</small>
         @error('precio')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
@@ -73,3 +77,15 @@
         @error('descripcion')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 </div>
+
+{{-- Precios base por tipo para autocompletar --}}
+<script>
+const preciosBase = @json($tiposMantenimiento->pluck('precio_base', 'id'));
+
+document.querySelector('[name="tipo_mantenimiento_id"]').addEventListener('change', function () {
+    const id = this.value;
+    if (id && preciosBase[id] !== undefined) {
+        document.getElementById('precio-input').value = parseFloat(preciosBase[id]).toFixed(2);
+    }
+});
+</script>

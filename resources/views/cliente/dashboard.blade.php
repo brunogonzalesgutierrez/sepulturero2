@@ -246,11 +246,13 @@
         <div class="nav-links">
             <a href="{{ route('home') }}#inicio">Inicio</a>
             <a href="{{ route('cliente.dashboard') }}">Dashboard</a>
+            
 
             <!--falta contrato-->
 
 
             <a href="{{ route('cliente.cuotas') }}">Cuotas</a>
+            <a href="{{ route('cliente.mantenimientos.index') }}">Mantenimientos</a>
 
 
         </div>

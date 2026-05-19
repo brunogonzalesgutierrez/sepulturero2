@@ -15,3 +15,36 @@ numeros de tarjetas
 5555555555554444
 2223003122003222
 2223003122003222
+
+
+En Laravel normalmente el orden sería así:
+
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+
+O todo junto:
+C:\xampp\mysql\bin\mysql.exe -u root -p
+mysql -u root -p
+
+
+drop database sepulturero_juan;
+create database sepulturero_juan;
+
+php artisan migrate --seed
+
+Entonces el flujo completo desde cero suele ser:
+
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
+
+
+para generar automaticamente el usuario Admin
+
+php artisan db:seed
+
+
+php artisan db:seed --class=DatosPruebaSeeder

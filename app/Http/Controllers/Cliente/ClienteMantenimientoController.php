@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\TipoMantenimiento;
 use App\Models\VentaMantenimiento;
 use App\Models\Contrato;
+use App\Models\Espacio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 
 class ClienteMantenimientoController extends Controller
 {
@@ -25,8 +27,8 @@ class ClienteMantenimientoController extends Controller
             'espacio.cementerio',
             'espacio.direccion',
         ])->where('cliente_id', $cliente->id)
-          ->orderBy('created_at', 'desc')
-          ->get();
+        ->orderBy('created_at', 'desc')
+        ->get();
 
         return view('cliente.mantenimientos.index', compact('ventas', 'cliente'));
     }
@@ -35,14 +37,13 @@ class ClienteMantenimientoController extends Controller
     {
         $cliente = $this->cliente();
 
-        // Espacios del cliente via contratos activos
         $espacios = \App\Models\Espacio::with([
             'cementerio',
             'direccion',
             'tipoInhumacion',
         ])->whereHas('contratos', function ($q) use ($cliente) {
             $q->where('cliente_id', $cliente->id)
-              ->where('estado', 'activo');
+            ->where('estado', 'activo');
         })->get();
 
         $tipos = TipoMantenimiento::orderBy('nombre')->get();
@@ -60,7 +61,6 @@ class ClienteMantenimientoController extends Controller
             'observacion'           => 'nullable|string|max:500',
         ]);
 
-        // Verificar que el espacio pertenece al cliente
         $tieneContrato = Contrato::where('cliente_id', $cliente->id)
             ->where('espacio_id', $request->espacio_id)
             ->where('estado', 'activo')
@@ -87,4 +87,21 @@ class ClienteMantenimientoController extends Controller
         return redirect()->route('cliente.mantenimientos.index')
             ->with('success', 'Solicitud enviada correctamente. Nos pondremos en contacto pronto.');
     }
+
+
+
+    public function pagar($ventaId)
+    {
+        $cliente = $this->cliente();
+
+        $venta = VentaMantenimiento::with(['tipoMantenimiento', 'espacio.cementerio'])
+            ->where('cliente_id', $cliente->id)
+            ->where('estado_pago', 'pendiente')
+            ->findOrFail($ventaId);
+
+        return view('cliente.mantenimientos.pagar', compact('venta', 'cliente'));
+    }
+
+
+
 }

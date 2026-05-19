@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'cliente' => \App\Http\Middleware\ClienteMiddleware::class,
         ]);
+
+        $middleware->append(\App\Http\Middleware\ContadorVisitas::class);
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -1,4 +1,6 @@
 @php $user = auth()->user(); @endphp
+<!-- aquie esta el sidebar  -->
+
 
 {{-- DASHBOARD --}}
 <a href="{{ route('dashboard') }}" class="sidebar-item">
@@ -62,6 +64,9 @@
 <a href="{{ route('mantenimientos.index') }}" class="sidebar-item">
     <i class="bi bi-tools"></i> Mantenimientos
 </a>
+<a href="{{ route('tipo_mantenimientos.index') }}" class="sidebar-item">
+    <i class="bi bi-tag"></i> Tipos de Mantenimiento
+</a>
 @endcan
 @endcanany
 
@@ -87,6 +92,12 @@
 <a href="{{ route('ventas.index') }}" class="sidebar-item">
     <i class="bi bi-cart-check"></i> Ventas
 </a>
+
+<a href="{{ route('venta_mantenimientos.index') }}" class="sidebar-item">
+    <i class="bi bi-tools"></i> Ventas Mantenimiento
+</a>
+
+
 @endcan
 @endcanany
 

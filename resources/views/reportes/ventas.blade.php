@@ -37,16 +37,53 @@
                     <option value="USD" {{ $moneda=='USD' ? 'selected':'' }}>USD</option>
                 </select>
             </div>
-            <div class="col-md-4 d-flex gap-2 align-items-end">
-                <button class="btn btn-sm btn-primary"><i class="bi bi-search me-1"></i>Filtrar</button>
-                @can('reportes.exportar')
-                <button name="exportar" value="pdf" class="btn btn-sm btn-danger">
-                    <i class="bi bi-file-pdf me-1"></i>PDF
-                </button>
-                @endcan
-                <a href="{{ route('reportes.ventas') }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-x-lg"></i>
-                </a>
+            <div class="col-md-4">
+    
+                <div class="d-flex gap-2 align-items-end flex-wrap">
+
+                    {{-- Filtrar --}}
+                    <button class="btn btn-sm btn-primary">
+                        <i class="bi bi-search me-1"></i>Filtrar
+                    </button>
+
+                    @can('reportes.exportar')
+
+                    {{-- Descargar PDF --}}
+                    <button name="exportar" value="pdf" class="btn btn-sm btn-danger">
+                        <i class="bi bi-file-pdf me-1"></i>Descargar PDF
+                    </button>
+
+                    {{-- Enviar PDF por correo --}}
+                    <div class="input-group input-group-sm" style="max-width:320px;">
+
+                        <input
+                            type="email"
+                            name="correo_destino"
+                            class="form-control form-control-sm"
+                            placeholder="correo@ejemplo.com, otro@ejemplo.com"
+                            title="Separa múltiples correos con coma"
+                        >
+
+                        <button
+                            name="exportar"
+                            value="pdf"
+                            class="btn btn-sm btn-outline-primary"
+                        >
+                            <i class="bi bi-envelope me-1"></i>Enviar PDF
+                        </button>
+
+                    </div>
+
+                    @endcan
+
+                    {{-- Limpiar --}}
+                    <a href="{{ route('reportes.ventas') }}"
+                    class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+
+                </div>
+
             </div>
         </form>
     </div>

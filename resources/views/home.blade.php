@@ -11,7 +11,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Raleway:wght@300;400;500;600&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('css/home.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/home.css') }}?v=2">
 
 
 
@@ -107,6 +107,26 @@
             <div class="hero-buttons">
                 <a href="#servicios" class="btn btn-primary"><i class="fas fa-monument"></i> Nuestros Servicios</a>
                 <a href="#contacto" class="btn btn-outline"><i class="fas fa-envelope"></i> Contáctenos</a>
+            </div>
+
+            <!-- BUSCADOR -->
+            <div class="hero-search">
+                <div class="search-title">
+                    <i class="fas fa-search"></i> Buscar Espacios Disponibles
+                </div>
+                <div class="search-bar">
+                    <select id="buscar-tipo">
+                        <option value="">Todos los tipos</option>
+                        <option value="nicho">Nichos</option>
+                        <option value="mausoleo">Mausoleos</option>
+                        <option value="lote">Lotes Familiares</option>
+                        <option value="individual">Espacios Individuales</option>
+                    </select>
+                    <button onclick="buscarEspacios()">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+                <div id="search-results" class="search-results" style="display:none;"></div>
             </div>
         </div>
     </section>
@@ -278,66 +298,49 @@
                 </p>
             </div>
             <div class="spaces-grid">
-                <div class="space-card">
-                    <a href="https://i.postimg.cc/9fpHkk2C/nicho.png" target="_blank">
+                <a href="{{ route('home.espacios', ['tipo' => 'nicho']) }}" style="text-decoration:none;">
+                    <div class="space-card">
                         <img src="https://i.postimg.cc/9fpHkk2C/nicho.png" alt="Nichos">
-                    </a>
-
-                    <span class="space-tag">Disponible</span>
-
-                    <div class="space-info">
-                        <h3>Nichos</h3>
-                        <p>
-                            Espacios individuales en nuestros jardines verticales, rodeados
-                            de áreas verdes
-                        </p>
+                        <span class="space-tag">Disponible</span>
+                        <div class="space-info">
+                            <h3>Nichos</h3>
+                            <p>Espacios individuales en nuestros jardines verticales, rodeados de áreas verdes</p>
+                        </div>
                     </div>
-                </div>
-                <div class="space-card">
-                    <a href="https://i.postimg.cc/N0Ywpc30/ausoles.png" target="_blank">
-                        <img src="https://i.postimg.cc/N0Ywpc30/ausoles.png" alt="Mausoleos" />
+                </a>
 
-                    </a>
-
-                    <span class="space-tag">Exclusivo</span>
-                    <div class="space-info">
-                        <h3>Mausoleos</h3>
-                        <p>
-                            Estructuras privadas y familiares con diseños arquitectónicos
-                            personalizados
-                        </p>
+                <a href="{{ route('home.espacios', ['tipo' => 'mausoleo']) }}" style="text-decoration:none;">
+                    <div class="space-card">
+                        <img src="https://i.postimg.cc/N0Ywpc30/ausoles.png" alt="Mausoleos">
+                        <span class="space-tag">Exclusivo</span>
+                        <div class="space-info">
+                            <h3>Mausoleos</h3>
+                            <p>Estructuras privadas y familiares con diseños arquitectónicos personalizados</p>
+                        </div>
                     </div>
-                </div>
-                <div class="space-card">
-                    <a href="https://i.postimg.cc/MGx8dSCv/lotes-familiares.png" target="_blank">
-                        <img src="https://i.postimg.cc/MGx8dSCv/lotes-familiares.png" alt="Lotes Familiares" />
-                    </a>
+                </a>
 
-                    <span class="space-tag">Disponible</span>
-                    <div class="space-info">
-                        <h3>Lotes Familiares</h3>
-                        <p>
-                            Terrenos espaciosos para varias generaciones, con posibilidad de
-                            jardinería propia
-                        </p>
+                <a href="{{ route('home.espacios', ['tipo' => 'lote']) }}" style="text-decoration:none;">
+                    <div class="space-card">
+                        <img src="https://i.postimg.cc/MGx8dSCv/lotes-familiares.png" alt="Lotes Familiares">
+                        <span class="space-tag">Disponible</span>
+                        <div class="space-info">
+                            <h3>Lotes Familiares</h3>
+                            <p>Terrenos espaciosos para varias generaciones, con posibilidad de jardinería propia</p>
+                        </div>
                     </div>
-                </div>
-                <div class="space-card">
-                    <a href="https://i.postimg.cc/VN1cD8x6/espacios-individuales.png" target="_blank">
-                        <img
-                            src="https://i.postimg.cc/VN1cD8x6/espacios-individuales.png"
-                            alt="Espacios Individuales" />
-                    </a>
+                </a>
 
-                    <span class="space-tag">Disponible</span>
-                    <div class="space-info">
-                        <h3>Espacios Individuales</h3>
-                        <p>
-                            Tumbas tradicionales en áreas tranquilas con mantenimiento
-                            incluido
-                        </p>
+                <a href="{{ route('home.espacios', ['tipo' => 'individual']) }}" style="text-decoration:none;">
+                    <div class="space-card">
+                        <img src="https://i.postimg.cc/VN1cD8x6/espacios-individuales.png" alt="Espacios Individuales">
+                        <span class="space-tag">Disponible</span>
+                        <div class="space-info">
+                            <h3>Espacios Individuales</h3>
+                            <p>Tumbas tradicionales en áreas tranquilas con mantenimiento incluido</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </section>
@@ -510,14 +513,14 @@
                             <div class="contact-icon"><i class="fas fa-phone"></i></div>
                             <div class="contact-item-text">
                                 <strong>Teléfono</strong>
-                                <p>+52 (123) 456-7890</p>
+                                <p>+591 70899084</p>
                             </div>
                         </div>
                         <div class="contact-item">
                             <div class="contact-icon"><i class="fas fa-envelope"></i></div>
                             <div class="contact-item-text">
                                 <strong>Correo Electrónico</strong>
-                                <p>info@elsepulturerojuan.com</p>
+                                <p>info@sepulturerojuan.xyz</p>
                             </div>
                         </div>
                         <div class="contact-item">
@@ -540,45 +543,58 @@
                 </div>
                 <div class="contact-form">
                     <h3>Envíenos un Mensaje</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nombre Completo</label>
-                            <input type="text" placeholder="Juan Pérez" />
+
+                    @if(session('contacto_ok'))
+                    <div style="background:rgba(74,222,128,0.1); border:1px solid #4ade80; border-radius:8px; padding:1rem; margin-bottom:1rem; color:#4ade80; font-size:0.9rem;">
+                        <i class="fas fa-check-circle me-2"></i> Mensaje enviado. Le responderemos pronto.
+                    </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('home.contacto') }}">
+                        @csrf
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nombre Completo *</label>
+                                <input type="text" name="nombre" value="{{ old('nombre') }}"
+                                    placeholder="Juan Pérez" required />
+                                @error('nombre')<span style="color:#f87171; font-size:0.8rem;">{{ $message }}</span>@enderror
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono</label>
+                                <input type="tel" name="telefono" value="{{ old('telefono') }}"
+                                    placeholder="+591 70899084" />
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label>Teléfono</label>
-                            <input type="tel" placeholder="+52 123 456 7890" />
+                            <label>Correo Electrónico *</label>
+                            <input type="email" name="email" value="{{ old('email') }}"
+                                placeholder="correo@ejemplo.com" required />
+                            @error('email')<span style="color:#f87171; font-size:0.8rem;">{{ $message }}</span>@enderror
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Correo Electrónico</label>
-                        <input type="email" placeholder="correo@ejemplo.com" />
-                    </div>
-                    <div class="form-group">
-                        <label>Servicio de Interés</label>
-                        <select>
-                            <option value="">Seleccionar servicio...</option>
-                            <option>Contratos Funerarios</option>
-                            <option>Inhumaciones</option>
-                            <option>Venta de Nichos</option>
-                            <option>Mausoleos</option>
-                            <option>Lotes Familiares</option>
-                            <option>Planes de Pago</option>
-                            <option>Asesoramiento</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Mensaje</label>
-                        <textarea
-                            rows="5"
-                            placeholder="Escriba su consulta aquí..."></textarea>
-                    </div>
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        style="width: 100%; justify-content: center; font-size: 0.8rem">
-                        <i class="fas fa-paper-plane"></i> Enviar Mensaje
-                    </button>
+                        <div class="form-group">
+                            <label>Servicio de Interés</label>
+                            <select name="servicio">
+                                <option value="">Seleccionar servicio...</option>
+                                <option>Contratos Funerarios</option>
+                                <option>Inhumaciones</option>
+                                <option>Venta de Nichos</option>
+                                <option>Mausoleos</option>
+                                <option>Lotes Familiares</option>
+                                <option>Planes de Pago</option>
+                                <option>Asesoramiento</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mensaje *</label>
+                            <textarea name="mensaje" rows="5"
+                                placeholder="Escriba su consulta aquí..." required>{{ old('mensaje') }}</textarea>
+                            @error('mensaje')<span style="color:#f87171; font-size:0.8rem;">{{ $message }}</span>@enderror
+                        </div>
+                        <button type="submit" class="btn btn-primary"
+                            style="width:100%; justify-content:center; font-size:0.8rem;">
+                            <i class="fas fa-paper-plane"></i> Enviar Mensaje
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -646,6 +662,14 @@
                 <p>Diseñado con respeto y profesionalismo</p>
             </div>
         </div>
+
+        <div style="text-align:center; padding:1rem; color:#8a8a9a; font-size:0.78rem; border-top:1px solid rgba(201,168,76,0.1);">
+            <i class="fas fa-eye me-1"></i>
+            Esta página ha sido visitada
+            <strong style="color:#c9a84c;">{{ number_format($visitas_pagina ?? 0) }}</strong>
+            {{ ($visitas_pagina ?? 0) == 1 ? 'vez' : 'veces' }}
+        </div>
+
     </footer>
 
     <script>
@@ -740,49 +764,7 @@
             observer.observe(el);
         });
 
-        // ========== FORMULARIO DE CONTACTO ==========
-        const contactForm = document.querySelector('.contact-form');
-        if (contactForm) {
-            const submitBtn = contactForm.querySelector('button');
-            if (submitBtn) {
-                submitBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-
-                    const nombre = contactForm.querySelector('input[placeholder="Juan Pérez"]');
-                    const email = contactForm.querySelector('input[type="email"]');
-                    const telefono = contactForm.querySelector('input[type="tel"]');
-                    const servicio = contactForm.querySelector('select');
-                    const mensaje = contactForm.querySelector('textarea');
-
-                    if (!nombre || !nombre.value.trim()) {
-                        alert('Por favor, ingrese su nombre completo');
-                        nombre?.focus();
-                        return;
-                    }
-
-                    if (!email || !email.value.includes('@')) {
-                        alert('Por favor, ingrese un correo electrónico válido');
-                        email?.focus();
-                        return;
-                    }
-
-                    if (!mensaje || !mensaje.value.trim()) {
-                        alert('Por favor, escriba su mensaje');
-                        mensaje?.focus();
-                        return;
-                    }
-
-                    alert('Mensaje enviado con éxito. Nos pondremos en contacto pronto.');
-
-                    // Limpiar formulario (opcional)
-                    nombre.value = '';
-                    email.value = '';
-                    if (telefono) telefono.value = '';
-                    if (servicio) servicio.value = '';
-                    mensaje.value = '';
-                });
-            }
-        }
+       
 
         // ========== CERRAR MENÚ MÓVIL AL REDIMENSIONAR ==========
         window.addEventListener('resize', function() {
@@ -792,6 +774,37 @@
         });
 
         console.log('Sitio El Sepulturero Juan - Cargado correctamente');
+
+
+        async function buscarEspacios() {
+            const tipo = document.getElementById('buscar-tipo').value;
+            const resultsDiv = document.getElementById('search-results');
+
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="result-empty"><i class="fas fa-spinner fa-spin"></i> Buscando...</div>';
+
+            const url = `{{ route('home.buscar') }}?tipo=${tipo}`;
+            const response = await fetch(url);
+            const espacios = await response.json();
+
+            if (espacios.length === 0) {
+                resultsDiv.innerHTML = '<div class="result-empty">No hay espacios disponibles para ese tipo.</div>';
+                return;
+            }
+
+            resultsDiv.innerHTML = espacios.slice(0, 5).map(e => `
+                <div class="result-item">
+                    <div>
+                        <span class="result-tipo">${e.tipo_inhumacion?.nombre ?? 'Espacio'}</span>
+                        <span style="color:#8a8a9a; margin-left:0.5rem;">${e.cementerio?.nombre ?? ''}</span>
+                    </div>
+                    <span class="result-precio">Bs. ${parseFloat(e.precio_m2).toFixed(2)}/m²</span>
+                </div>
+            `).join('') + (espacios.length > 5 ? `<div class="result-empty">Y ${espacios.length - 5} más disponibles. <a href="{{ route('cliente.login') }}" style="color:#c9a84c;">Contáctenos</a></div>` : '');
+        }
+
+
+
     </script>
 </body>
 

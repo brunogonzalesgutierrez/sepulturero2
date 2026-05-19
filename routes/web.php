@@ -22,6 +22,9 @@ use App\Http\Controllers\TwoFactorController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/buscar-espacios', [App\Http\Controllers\HomeController::class, 'buscarEspacios'])->name('home.buscar');  // 👈 aquí
+Route::get('/espacios-disponibles', [App\Http\Controllers\HomeController::class, 'espaciosDisponibles'])->name('home.espacios');
+Route::post('/contacto', [App\Http\Controllers\HomeController::class, 'enviarContacto'])->name('home.contacto');
 
 Auth::routes(['register' => false]);
 
@@ -40,6 +43,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('espacios',          EspacioController::class);
     Route::resource('tipo_inhumaciones', TipoInhumacionController::class);
     Route::resource('mantenimientos',    MantenimientoController::class);
+    Route::resource('tipo_mantenimientos', App\Http\Controllers\TipoMantenimientoController::class);
+    Route::resource('venta_mantenimientos', \App\Http\Controllers\VentaMantenimientoController::class);
+    
     Route::resource('inhumaciones', InhumacionController::class)->parameters([
         'inhumaciones' => 'inhumacion'
     ]);
@@ -105,12 +111,31 @@ Route::prefix('cliente')->name('cliente.')->group(function () {
         Route::post('/libelula/{cuota}',        [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'pagar'])->name('libelula.pagar');
         Route::get('/libelula/{cuota}/retorno', [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'retorno'])->name('libelula.retorno');
 
+
+        // Libélula — Mantenimientos
+        Route::post('/libelula/mantenimiento/{venta}', [\App\Http\Controllers\Cliente\LibelulaMantenimientoPagoController::class, 'pagar'])->name('libelula.mantenimiento.pagar');
+        Route::get('/libelula/mantenimiento/{venta}/retorno', [\App\Http\Controllers\Cliente\LibelulaMantenimientoPagoController::class, 'retorno'])->name('libelula.mantenimiento.retorno');
+
+        // Pagar mantenimiento — página de selección de método
+        Route::get('/mantenimientos/{venta}/pagar', [\App\Http\Controllers\Cliente\ClienteMantenimientoController::class, 'pagar'])->name('mantenimientos.pagar');
+
         // Perfil
         Route::get('/perfil', [\App\Http\Controllers\Cliente\ClientePortalController::class, 'perfil'])->name('perfil');
         Route::put('/perfil', [\App\Http\Controllers\Cliente\ClientePortalController::class, 'actualizarPerfil'])->name('perfil.update');
+    
+        Route::get('/mantenimientos',          [\App\Http\Controllers\Cliente\ClienteMantenimientoController::class, 'index'])->name('mantenimientos.index');
+        Route::post('/mantenimientos',         [\App\Http\Controllers\Cliente\ClienteMantenimientoController::class, 'store'])->name('mantenimientos.store');
+        Route::get('/mantenimientos/solicitar',[\App\Http\Controllers\Cliente\ClienteMantenimientoController::class, 'create'])->name('mantenimientos.create');
+
+
     });
 });
 
 // Callback Libélula — FUERA de todo grupo
 Route::get('/cliente/libelula/callback', [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'callback'])
     ->name('cliente.libelula.callback');
+
+
+
+Route::get('/cliente/libelula/mantenimiento/callback', [\App\Http\Controllers\Cliente\LibelulaMantenimientoPagoController::class, 'callback'])
+    ->name('cliente.libelula.mantenimiento.callback');
