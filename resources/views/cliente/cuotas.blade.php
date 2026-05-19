@@ -273,6 +273,8 @@
 
 
             <a href="{{ route('cliente.cuotas') }}">Cuotas</a>
+            
+            <a href="{{ route('cliente.mantenimientos.index') }}">Mantenimientos</a>
 
 
         </div>

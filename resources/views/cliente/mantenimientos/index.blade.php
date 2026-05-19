@@ -13,8 +13,21 @@
         .top-bar { background:var(--secondary); border-bottom:2px solid var(--accent); padding:0.8rem 1.5rem; display:flex; justify-content:space-between; align-items:center; }
         .brand { font-family:'Cinzel',serif; color:var(--accent); font-size:1rem; font-weight:700; }
         .nav-links { display:flex; gap:0.25rem; align-items:center; }
-        .nav-links a { text-decoration:none; color:var(--muted); font-size:0.72rem; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; padding:0.4rem 0.8rem; border-radius:4px; transition:all 0.2s; }
-        .nav-links a:hover { color:var(--accent); background:rgba(201,168,76,0.08); }
+        .nav-links a {
+            text-decoration: none;
+            color: #ffffff;   /* cambia var(--muted) por esto */
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--accent);
+            background: rgba(201, 168, 76, 0.08);
+        }
         .user-info { color:var(--muted); font-size:0.85rem; display:flex; align-items:center; gap:1rem; }
         .btn-logout { background:transparent; border:1px solid var(--accent); color:var(--accent); font-size:0.8rem; padding:4px 12px; border-radius:4px; cursor:pointer; transition:all 0.2s; }
         .btn-logout:hover { background:var(--accent); color:var(--primary); }
