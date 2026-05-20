@@ -139,23 +139,7 @@
             transition: all 0.2s;
         }
 
-        .btn-paypal {
-            background: #003087;
-            color: #fff;
-        }
-
-        .btn-paypal:hover {
-            background: #00408f;
-        }
-
-        .btn-stripe {
-            background: #635bff;
-            color: #fff;
-        }
-
-        .btn-stripe:hover {
-            background: #7a73ff;
-        }
+        
 
         .btn-back {
             display: block;
@@ -234,39 +218,7 @@
 
         {{-- Métodos de pago --}}
         <div class="metodos">
-            {{-- PayPal --}}
-            <div class="metodo-card">
-                <div class="metodo-info">
-                    <div class="metodo-icon">🅿️</div>
-                    <div>
-                        <div class="metodo-nombre">PayPal</div>
-                        <div class="metodo-desc">Paga con tu cuenta PayPal o tarjeta</div>
-                    </div>
-                </div>
-                <form method="POST" action="{{ route('cliente.paypal.pagar', $cuota->id) }}">
-                    @csrf
-                    <button type="submit" class="btn-pagar btn-paypal">
-                        Pagar con PayPal
-                    </button>
-                </form>
-            </div>
-
-            {{-- Stripe --}}
-            <div class="metodo-card">
-                <div class="metodo-info">
-                    <div class="metodo-icon">💳</div>
-                    <div>
-                        <div class="metodo-nombre">Stripe</div>
-                        <div class="metodo-desc">Paga con tarjeta de crédito o débito</div>
-                    </div>
-                </div>
-                <form method="POST" action="{{ route('cliente.stripe.pagar', $cuota->id) }}">
-                    @csrf
-                    <button type="submit" class="btn-pagar btn-stripe">
-                        Pagar con Stripe
-                    </button>
-                </form>
-            </div>
+            
 
 
             {{-- Libélula --}}

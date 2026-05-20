@@ -37,16 +37,15 @@
 
     <div class="col-md-6">
         <label class="form-label fw-semibold">Empleado que Registra</label>
-        <select name="empleado_id" class="form-select @error('empleado_id') is-invalid @enderror">
-            <option value="">Seleccione...</option>
-            @foreach($empleados as $e)
-            <option value="{{ $e->id }}"
-                {{ old('empleado_id', $venta->empleado_id ?? auth()->user()->empleado_id) == $e->id ? 'selected' : '' }}>
-                {{ $e->nombre }} {{ $e->paterno }}
-            </option>
-            @endforeach
-        </select>
-        @error('empleado_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        @php
+            $empId = $venta->empleado_id ?? auth()->user()->empleado_id;
+            $emp   = $empleados->firstWhere('id', $empId);
+        @endphp
+        <input type="text"
+            class="form-control"
+            value="{{ $emp ? $emp->nombre.' '.$emp->paterno : 'Sin asignar' }}"
+            disabled>
+        <input type="hidden" name="empleado_id" value="{{ $empId }}">
     </div>
 
     <div class="col-md-4">

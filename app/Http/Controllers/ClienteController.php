@@ -1,90 +1,85 @@
 <?php
 
-namespace App\Http\Controllers\Cliente;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\TipoMantenimiento;
-use App\Models\VentaMantenimiento;
-use App\Models\Contrato;
+use App\Models\Cliente;
+use App\Http\Requests\ClienteRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class ClienteMantenimientoController extends Controller
+class ClienteController extends Controller
 {
-    private function cliente()
+    public function index(Request $request)
     {
-        return Auth::user()->cliente;
-    }
+        $this->authorize('clientes.ver');
 
-    public function index()
-    {
-        $cliente = $this->cliente();
+        $query = Cliente::query();
 
-        $ventas = VentaMantenimiento::with([
-            'tipoMantenimiento',
-            'espacio.cementerio',
-            'espacio.direccion',
-        ])->where('cliente_id', $cliente->id)
-          ->orderBy('created_at', 'desc')
-          ->get();
+        if ($request->filled('buscar')) {
+            $b = $request->buscar;
+            $query->where(function ($q) use ($b) {
+                $q->where('ci', 'like', "%$b%")
+                    ->orWhere('nombre', 'like', "%$b%")
+                    ->orWhere('paterno', 'like', "%$b%")
+                    ->orWhere('materno', 'like', "%$b%")
+                    ->orWhere('telefono', 'like', "%$b%");
+            });
+        }
 
-        return view('cliente.mantenimientos.index', compact('ventas', 'cliente'));
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        $clientes = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        return view('clientes.index', compact('clientes'));
     }
 
     public function create()
     {
-        $cliente = $this->cliente();
+        $this->authorize('clientes.crear');
 
-        // Espacios del cliente via contratos activos
-        $espacios = \App\Models\Espacio::with([
-            'cementerio',
-            'direccion',
-            'tipoInhumacion',
-        ])->whereHas('contratos', function ($q) use ($cliente) {
-            $q->where('cliente_id', $cliente->id)
-              ->where('estado', 'activo');
-        })->get();
-
-        $tipos = TipoMantenimiento::orderBy('nombre')->get();
-
-        return view('cliente.mantenimientos.create', compact('espacios', 'tipos', 'cliente'));
+        return view('clientes.create');
     }
 
-    public function store(Request $request)
+    public function store(ClienteRequest $request)
     {
-        $cliente = $this->cliente();
+        $this->authorize('clientes.crear');
 
-        $request->validate([
-            'espacio_id'            => 'required|exists:espacios,id',
-            'tipo_mantenimiento_id' => 'required|exists:tipo_mantenimientos,id',
-            'observacion'           => 'nullable|string|max:500',
-        ]);
+        Cliente::create($request->validated());
+        return redirect()->route('clientes.index')->with('success', 'Cliente registrado correctamente.');
+    }
 
-        // Verificar que el espacio pertenece al cliente
-        $tieneContrato = Contrato::where('cliente_id', $cliente->id)
-            ->where('espacio_id', $request->espacio_id)
-            ->where('estado', 'activo')
-            ->exists();
+    public function show(Cliente $cliente)
+    {
+        $this->authorize('clientes.ver');
+        $cliente->load(['contratos.espacio', 'ventas']);
+        return view('clientes.show', compact('cliente'));
+    }
 
-        if (!$tieneContrato) {
-            return back()->withErrors(['espacio_id' => 'No tiene un contrato activo para ese espacio.']);
+    public function edit(Cliente $cliente)
+    {
+        $this->authorize('clientes.editar');
+
+        return view('clientes.edit', compact('cliente'));
+    }
+
+    public function update(ClienteRequest $request, Cliente $cliente)
+    {
+        $this->authorize('clientes.editar');
+
+        $cliente->update($request->validated());
+        return redirect()->route('clientes.index')->with('success', 'Cliente actualizado correctamente.');
+    }
+
+    public function destroy(Cliente $cliente)
+    {
+        $this->authorize('clientes.eliminar');
+
+        if ($cliente->contratos()->count() > 0 || $cliente->ventas()->count() > 0) {
+            return redirect()->route('clientes.index')
+                ->with('error', 'No se puede eliminar el cliente porque tiene contratos o ventas asociados .');
         }
-
-        $tipo = TipoMantenimiento::findOrFail($request->tipo_mantenimiento_id);
-
-        VentaMantenimiento::create([
-            'espacio_id'            => $request->espacio_id,
-            'tipo_mantenimiento_id' => $request->tipo_mantenimiento_id,
-            'cliente_id'            => $cliente->id,
-            'empleado_id'           => null,
-            'precio'                => $tipo->precio_base,
-            'estado_pago'           => 'pendiente',
-            'metodo_pago'           => null,
-            'fecha_solicitud'       => now()->toDateString(),
-            'observacion'           => $request->observacion,
-        ]);
-
-        return redirect()->route('cliente.mantenimientos.index')
-            ->with('success', 'Solicitud enviada correctamente. Nos pondremos en contacto pronto.');
+        $cliente->delete();
+        return redirect()->route('clientes.index')->with('success', 'Cliente eliminado correctamente.');
     }
 }

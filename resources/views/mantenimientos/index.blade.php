@@ -72,7 +72,7 @@
                             <small>{{ $m->espacio->cementerio->nombre }}</small><br>
                             <strong>Secc {{ $m->espacio->direccion->seccion ?? '?' }} / {{ $m->espacio->direccion->numero ?? '?' }}</strong>
                         </td>
-                        <td><span class="badge bg-secondary">{{ ucfirst($m->tipo) }}</span></td>
+                        <td><span class="badge bg-secondary">{{ $m->tipoMantenimiento->nombre ?? '—' }}</span></td>
                         <td>{{ Str::limit($m->descripcion, 50) }}</td>
                         <td>{{ number_format($m->precio, 2) }}</td>
                         <td>{{ $m->fecha_inicio?->format('d/m/Y') ?? '—' }}</td>

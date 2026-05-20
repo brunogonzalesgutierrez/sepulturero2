@@ -98,17 +98,8 @@ Route::prefix('cliente')->name('cliente.')->group(function () {
         Route::post('/logout',       [\App\Http\Controllers\Cliente\ClienteAuthController::class, 'logout'])->name('logout');
         Route::get('/pagar/{cuota}', [\App\Http\Controllers\Cliente\ClientePortalController::class, 'pagar'])->name('pagar');
 
-        // PayPal
-        Route::post('/paypal/{cuota}',        [\App\Http\Controllers\Cliente\PaypalPagoController::class, 'pagar'])->name('paypal.pagar');
-        Route::get('/paypal/{cuota}/success', [\App\Http\Controllers\Cliente\PaypalPagoController::class, 'success'])->name('paypal.success');
-        Route::get('/paypal/{cuota}/cancel',  [\App\Http\Controllers\Cliente\PaypalPagoController::class, 'cancel'])->name('paypal.cancel');
-
-        // Stripe
-        Route::post('/stripe/{cuota}',        [\App\Http\Controllers\Cliente\StripePagoController::class, 'pagar'])->name('stripe.pagar');
-        Route::get('/stripe/{cuota}/success', [\App\Http\Controllers\Cliente\StripePagoController::class, 'success'])->name('stripe.success');
-        Route::get('/stripe/{cuota}/cancel',  [\App\Http\Controllers\Cliente\StripePagoController::class, 'cancel'])->name('stripe.cancel');
-
-        // Libélula
+        
+   
         // Libélula — Cuotas
         Route::post('/libelula/{cuota}',          [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'pagar'])->name('libelula.pagar');
         Route::get('/libelula/{cuota}/retorno',   [\App\Http\Controllers\Cliente\LibelulaPagoController::class, 'retorno'])->name('libelula.retorno');

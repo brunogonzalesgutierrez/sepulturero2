@@ -10,7 +10,7 @@ class ContadorVisitas
     // Rutas que NO queremos contar (assets, ajax, etc.)
     private array $excluir = [
         'login', 'logout', 'register',
-        '2fa', 'paypal', 'stripe', 'libelula',
+        '2fa', 'libelula',
     ];
 
     public function handle(Request $request, Closure $next)
