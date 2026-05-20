@@ -102,7 +102,6 @@ class EspacioController extends Controller
                 'dimension_id'       => $dimension->id,
                 'tipo_inhumacion_id' => $request->tipo_inhumacion_id,
                 'estado'             => $request->estado,
-                'precio_m2'          => $request->precio_m2,
             ]);
 
             // 3. Crear dirección
@@ -157,7 +156,6 @@ class EspacioController extends Controller
                 'cementerio_id'      => $request->cementerio_id,
                 'tipo_inhumacion_id' => $request->tipo_inhumacion_id,
                 'estado'             => $request->estado,
-                'precio_m2'          => $request->precio_m2,
             ]);
 
             // Actualizar dirección

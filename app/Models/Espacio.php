@@ -8,8 +8,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Espacio extends Model
 {
     use SoftDeletes;
-    protected $fillable = ['cementerio_id', 'dimension_id', 'tipo_inhumacion_id', 'estado', 'precio_m2'];
-
+    protected $fillable = [
+        'cementerio_id',
+        'dimension_id',
+        'tipo_inhumacion_id',
+        'estado',
+        // 'precio_m2' ← ELIMINADO
+    ];
+    
     public function cementerio()
     {
         return $this->belongsTo(Cementerio::class);

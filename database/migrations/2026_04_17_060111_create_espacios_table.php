@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('espacios', function (Blueprint $table) {
@@ -17,15 +14,12 @@ return new class extends Migration
             $table->foreignId('dimension_id')->constrained('dimensiones')->restrictOnDelete();
             $table->foreignId('tipo_inhumacion_id')->constrained('tipo_inhumaciones')->restrictOnDelete();
             $table->enum('estado', ['disponible', 'ocupado', 'mantenimiento', 'reservado'])->default('disponible');
-            $table->decimal('precio_m2', 10, 2);
+            // precio_m2 ELIMINADO — ahora viene del tipo_inhumacion
             $table->timestamps();
             $table->softDeletes();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('espacios');

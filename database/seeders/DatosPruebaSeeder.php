@@ -165,24 +165,24 @@ class DatosPruebaSeeder extends Seeder
         // 7. TIPOS DE INHUMACIÓN
         // ────────────────────────────────────────────────
         $tipoNicho = TipoInhumacion::firstOrCreate(['nombre' => 'Nicho'], [
-            'precio'        => 3500.00,
-            'precio_base'   => 3000.00,
+            'precio'        => 500.00,   // precio fijo de inhumación
+            'precio_m2'     => 1400.00,  // precio por m² (antes precio_base)
             'capacidad_max' => 1,
             'estado'        => 'activo',
             'area_base'     => 2.50,
         ]);
 
         $tipoBoveda = TipoInhumacion::firstOrCreate(['nombre' => 'Bóveda'], [
-            'precio'        => 8000.00,
-            'precio_base'   => 7000.00,
+            'precio'        => 800.00,   // precio fijo de inhumación
+            'precio_m2'     => 888.00,   // precio por m²
             'capacidad_max' => 4,
             'estado'        => 'activo',
             'area_base'     => 9.00,
         ]);
 
         $tipoTerreno = TipoInhumacion::firstOrCreate(['nombre' => 'Terreno'], [
-            'precio'        => 5000.00,
-            'precio_base'   => 4500.00,
+            'precio'        => 600.00,   // precio fijo de inhumación
+            'precio_m2'     => 833.00,   // precio por m²
             'capacidad_max' => 2,
             'estado'        => 'activo',
             'area_base'     => 6.00,
@@ -224,14 +224,16 @@ class DatosPruebaSeeder extends Seeder
         // ────────────────────────────────────────────────
         // 9. ESPACIOS (con dimensiones y direcciones)
         // ────────────────────────────────────────────────
+
+        // [cementerio_id, tipo, ancho, largo, seccion, numero, calle, fila]
+        // precio_m2 ELIMINADO — viene del tipo
         $espaciosData = [
-            // [cementerio_id, tipo_id, ancho, largo, precio_m2, seccion, numero, calle, fila]
-            [$cementerio->id,  $tipoNicho->id,   1.00, 2.50, 1400.00, 'A', '1', 'Calle 1', '1'],
-            [$cementerio->id,  $tipoNicho->id,   1.00, 2.50, 1400.00, 'A', '2', 'Calle 1', '1'],
-            [$cementerio->id,  $tipoBoveda->id,  3.00, 3.00,  888.00, 'B', '1', 'Calle 2', '1'],
-            [$cementerio->id,  $tipoTerreno->id, 2.00, 3.00,  833.00, 'C', '1', 'Calle 3', '1'],
-            [$cementerio2->id, $tipoNicho->id,   1.00, 2.50, 1400.00, 'A', '1', 'Av. 1',   '1'],
-            [$cementerio2->id, $tipoBoveda->id,  3.00, 3.00,  888.00, 'B', '1', 'Av. 2',   '1'],
+            [$cementerio->id,  $tipoNicho->id,   1.00, 2.50, 'A', '1', 'Calle 1', '1'],
+            [$cementerio->id,  $tipoNicho->id,   1.00, 2.50, 'A', '2', 'Calle 1', '1'],
+            [$cementerio->id,  $tipoBoveda->id,  3.00, 3.00, 'B', '1', 'Calle 2', '1'],
+            [$cementerio->id,  $tipoTerreno->id, 2.00, 3.00, 'C', '1', 'Calle 3', '1'],
+            [$cementerio2->id, $tipoNicho->id,   1.00, 2.50, 'A', '1', 'Av. 1',   '1'],
+            [$cementerio2->id, $tipoBoveda->id,  3.00, 3.00, 'B', '1', 'Av. 2',   '1'],
         ];
 
         $espaciosCreados = [];
@@ -248,15 +250,15 @@ class DatosPruebaSeeder extends Seeder
                 'dimension_id'       => $dimId,
                 'tipo_inhumacion_id' => $e[1],
                 'estado'             => 'disponible',
-                'precio_m2'          => $e[4],
+                // precio_m2 ELIMINADO
             ]);
 
             DB::table('direcciones')->insert([
                 'espacio_id' => $espacio->id,
-                'seccion'    => $e[5],
-                'numero'     => $e[6],
-                'calle'      => $e[7],
-                'fila'       => $e[8],
+                'seccion'    => $e[4],
+                'numero'     => $e[5],
+                'calle'      => $e[6],
+                'fila'       => $e[7],
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

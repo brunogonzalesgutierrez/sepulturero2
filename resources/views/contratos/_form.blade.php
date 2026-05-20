@@ -3,7 +3,8 @@
     {{-- CLIENTE --}}
     <div class="col-md-6">
         <label class="form-label fw-semibold">Cliente <span class="text-danger">*</span></label>
-        <select name="cliente_id" class="form-select @error('cliente_id') is-invalid @enderror" required>
+        <select name="cliente_id" id="cliente_select"
+            class="form-select @error('cliente_id') is-invalid @enderror" required>
             <option value="">Seleccione...</option>
             @foreach($clientes as $c)
             <option value="{{ $c->id }}"
@@ -20,27 +21,26 @@
         <label class="form-label fw-semibold">Espacio <span class="text-danger">*</span></label>
         <select name="espacio_id" id="espacio_select"
             class="form-select @error('espacio_id') is-invalid @enderror" required>
-            <option value="">Seleccione...</option>
+            <option value="">Seleccione un espacio...</option>
             @foreach($espacios as $e)
             @php
-                $ancho           = $e->dimension->ancho ?? 0;
-                $largo           = $e->dimension->largo ?? 0;
-                $precioM2        = $e->precio_m2 ?? 0;
-                $precioCalculado = round($ancho * $largo * $precioM2, 2);
+                $ancho         = $e->dimension->ancho ?? 0;
+                $largo         = $e->dimension->largo ?? 0;
+                $precioM2      = $e->tipoInhumacion->precio_m2 ?? 0;
+                $precioFijo    = $e->tipoInhumacion->precio ?? 0;
+                $precioEspacio = round($ancho * $largo * $precioM2, 2);
+                $precioTotal   = round($precioEspacio + $precioFijo, 2);
             @endphp
             <option value="{{ $e->id }}"
-                data-precio="{{ $precioCalculado }}"
                 data-ancho="{{ $ancho }}"
                 data-largo="{{ $largo }}"
                 data-precio-m2="{{ $precioM2 }}"
+                data-precio-fijo="{{ $precioFijo }}"
+                data-precio-espacio="{{ $precioEspacio }}"
+                data-precio-total="{{ $precioTotal }}"
                 data-tipo="{{ $e->tipoInhumacion->nombre ?? '' }}"
                 {{ old('espacio_id', $contrato?->espacio_id) == $e->id ? 'selected' : '' }}>
-                Espacio #{{ $e->id }} — {{ $e->cementerio->nombre ?? '' }}
-                | {{ $e->tipoInhumacion->nombre ?? '' }}
-                | Secc: {{ $e->direccion->seccion ?? '?' }}
-                Nro: {{ $e->direccion->numero ?? '?' }}
-                | {{ $ancho }}m × {{ $largo }}m
-                | {{ number_format($precioCalculado, 2) }} BOB
+                #{{ $e->id }} | {{ $e->tipoInhumacion->nombre ?? '' }} | {{ $e->cementerio->nombre ?? '' }} | Secc: {{ $e->direccion->seccion ?? '?' }} Nro: {{ $e->direccion->numero ?? '?' }} | {{ $ancho }}m × {{ $largo }}m | {{ number_format($precioTotal, 2) }} BOB
             </option>
             @endforeach
         </select>
@@ -48,24 +48,34 @@
     </div>
 
     {{-- INFO DEL ESPACIO SELECCIONADO --}}
-    <div class="col-md-12" id="info-espacio" style="display:none;">
-        <div class="alert alert-info py-2 mb-0">
-            <div class="row g-2 text-center">
-                <div class="col">
-                    <small class="text-muted d-block">Tipo</small>
-                    <strong id="info-tipo">—</strong>
-                </div>
-                <div class="col">
-                    <small class="text-muted d-block">Dimensiones</small>
-                    <strong id="info-dims">—</strong>
-                </div>
-                <div class="col">
-                    <small class="text-muted d-block">Precio/m²</small>
-                    <strong id="info-precio-m2">—</strong>
-                </div>
-                <div class="col">
-                    <small class="text-muted d-block">Precio calculado</small>
-                    <strong id="info-precio-total" class="text-success">—</strong>
+    <div class="col-12" id="info-espacio" style="display:none;">
+        <div class="card border-0 bg-light">
+            <div class="card-body py-2">
+                <div class="row g-2 text-center">
+                    <div class="col">
+                        <small class="text-muted d-block">Tipo</small>
+                        <strong id="info-tipo">—</strong>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted d-block">Dimensiones</small>
+                        <strong id="info-dims">—</strong>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted d-block">Precio/m²</small>
+                        <strong id="info-precio-m2">—</strong>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted d-block">Precio espacio</small>
+                        <strong id="info-precio-espacio">—</strong>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted d-block">Precio inhumación</small>
+                        <strong id="info-precio-fijo">—</strong>
+                    </div>
+                    <div class="col">
+                        <small class="text-muted d-block">Total</small>
+                        <strong id="info-precio-total" class="text-success fs-5">—</strong>
+                    </div>
                 </div>
             </div>
         </div>
@@ -89,7 +99,7 @@
             value="{{ old('monto_base', $contrato?->monto_base ?? '') }}"
             placeholder="Se calcula al elegir espacio"
             required>
-        <small class="text-muted">Se autocompleta al seleccionar el espacio. Puedes ajustarlo.</small>
+        <small class="text-muted">(ancho × largo × precio/m²) + precio inhumación</small>
         @error('monto_base')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
@@ -117,45 +127,65 @@
 </div>
 
 @push('scripts')
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
 <script>
-    const espacioSelect = document.getElementById('espacio_select');
-    const montoBase     = document.getElementById('monto_base');
-    const infoBox       = document.getElementById('info-espacio');
+    // ── Tom Select para Cliente ──
+    new TomSelect('#cliente_select', {
+        placeholder: 'Buscar cliente...',
+        allowEmptyOption: true,
+    });
 
-    function actualizarInfoEspacio() {
-        const opt = espacioSelect.options[espacioSelect.selectedIndex];
+    // ── Tom Select para Espacio ──
+    const tomEspacio = new TomSelect('#espacio_select', {
+        placeholder: 'Buscar espacio...',
+        allowEmptyOption: true,
+        onChange: function(value) {
+            montoBase.value = '';
+            actualizarInfoEspacio(value);
+        }
+    });
 
-        if (!opt || !opt.value) {
+    const montoBase = document.getElementById('monto_base');
+    const infoBox   = document.getElementById('info-espacio');
+
+    function actualizarInfoEspacio(value) {
+        if (!value) {
             infoBox.style.display = 'none';
             return;
         }
 
-        const precio   = parseFloat(opt.dataset.precio   || 0);
-        const ancho    = parseFloat(opt.dataset.ancho     || 0);
-        const largo    = parseFloat(opt.dataset.largo     || 0);
-        const precioM2 = parseFloat(opt.dataset.precioM2  || 0);
-        const tipo     = opt.dataset.tipo || '—';
+        // Buscar la option original por valor
+        const opt = document.querySelector('#espacio_select option[value="' + value + '"]');
+        if (!opt) return;
 
-        // Autocompletar monto base solo si está vacío
+        const ancho         = parseFloat(opt.dataset.ancho         || 0);
+        const largo         = parseFloat(opt.dataset.largo         || 0);
+        const precioM2      = parseFloat(opt.dataset.precioM2      || 0);
+        const precioFijo    = parseFloat(opt.dataset.precioFijo    || 0);
+        const precioEspacio = parseFloat(opt.dataset.precioEspacio || 0);
+        const precioTotal   = parseFloat(opt.dataset.precioTotal   || 0);
+        const tipo          = opt.dataset.tipo || '—';
+
         if (!montoBase.value || montoBase.value == '0') {
-            montoBase.value = precio.toFixed(2);
+            montoBase.value = precioTotal.toFixed(2);
         }
 
-        // Mostrar info
-        document.getElementById('info-tipo').textContent        = tipo;
-        document.getElementById('info-dims').textContent        = ancho + 'm × ' + largo + 'm = ' + (ancho * largo).toFixed(2) + 'm²';
-        document.getElementById('info-precio-m2').textContent   = precioM2.toFixed(2) + ' BOB/m²';
-        document.getElementById('info-precio-total').textContent = precio.toFixed(2) + ' BOB';
+        document.getElementById('info-tipo').textContent           = tipo;
+        document.getElementById('info-dims').textContent           = ancho + 'm × ' + largo + 'm = ' + (ancho * largo).toFixed(2) + 'm²';
+        document.getElementById('info-precio-m2').textContent      = precioM2.toFixed(2) + ' BOB/m²';
+        document.getElementById('info-precio-espacio').textContent = precioEspacio.toFixed(2) + ' BOB';
+        document.getElementById('info-precio-fijo').textContent    = precioFijo.toFixed(2) + ' BOB';
+        document.getElementById('info-precio-total').textContent   = precioTotal.toFixed(2) + ' BOB';
 
         infoBox.style.display = 'block';
     }
 
-    espacioSelect.addEventListener('change', function () {
-        montoBase.value = ''; // limpiar para que autocomplete con el nuevo espacio
-        actualizarInfoEspacio();
-    });
-
-    // Al cargar la página (modo edición o cuando hay old())
-    actualizarInfoEspacio();
+    // Al cargar la página (modo edición)
+    const valorInicial = tomEspacio.getValue();
+    if (valorInicial) {
+        actualizarInfoEspacio(valorInicial);
+    }
 </script>
 @endpush
