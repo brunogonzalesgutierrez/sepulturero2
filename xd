@@ -48,3 +48,5 @@ php artisan db:seed
 
 
 php artisan db:seed --class=DatosPruebaSeeder
+
+php artisan serve
